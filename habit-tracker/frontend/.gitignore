@@ -1,0 +1,18 @@
+# secrets and local config
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+# dependencies and builds
+node_modules/
+dist/
+target/
+*.tsbuildinfo
+# editor and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
