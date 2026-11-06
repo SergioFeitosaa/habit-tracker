@@ -1,4 +1,4 @@
-# Executar na raiz do repositório, depois de criar o remoto e autenticar: gh auth login
+﻿# Executar na raiz do repositório, depois de criar o remoto e autenticar: gh auth login
 # Seguro para retomada: ignora títulos já existentes (abertos ou fechados).
 $ErrorActionPreference = 'Stop'
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw 'Instale GitHub CLI: https://cli.github.com/' }
