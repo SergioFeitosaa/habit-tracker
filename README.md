@@ -99,10 +99,11 @@ O CI também inventaria e consulta advisories das dependências Maven nas execu�
 BCrypt, JWT de 8 horas, verificação por dono no backend, validação e CORS configurável. `localStorage` não é usado; o token fica em memória. Senhas, tokens e `.env` não devem ser enviados ao Git. Em produção seriam necessários HTTPS, limitação de tentativas, revogação/rotação de tokens, políticas de senha, auditoria, tratamento mais completo e avaliação de dependências. Não existe SLA ou benchmark de desempenho; veja `docs/qualidade.md`.
 
 ## Documentação e API
+- [Índice da documentação](docs/README.md), [guia de contribuição](CONTRIBUTING.md) e [changelog](CHANGELOG.md).
 - [Termo de abertura](docs/project-charter.md), [requisitos e regras](docs/requisitos.md), [casos de uso](docs/casos-de-uso.md), [histórias](docs/user-stories.md), [arquitetura](docs/arquitetura.md), [modelo de dados](docs/modelo-dados.md), [rastreabilidade](docs/rastreabilidade.md), [qualidade](docs/qualidade.md), [backlog de Issues](docs/issues.md) e [publicação GitHub](docs/github.md).
 - API: `POST /api/auth/register`, `POST /api/auth/login`, `GET/POST /api/habits`, `GET/PUT/DELETE /api/habits/{id}` (DELETE arquiva), `PUT/DELETE /api/habits/{id}/completions/{yyyy-MM-dd}`, `GET /api/habits/{id}/completions?from=yyyy-MM-dd&to=yyyy-MM-dd`. Envie `Authorization: Bearer <token>` nas rotas de hábitos. Para arquivados, `GET /api/habits?archived=true`.
 
 ## Git e versões
-Use `develop` para integração, `main` para versões estáveis e branches `feature/<numero>-descricao` ou `fix/<numero>-descricao`. Faça PR para develop; após validação, PR develop → main, sem commits diretos em main. Use `feat:`, `fix:`, `docs:`, `test:` e referência à Issue. Após publicação, proteja main e develop. Guia completo em [docs/github.md](docs/github.md).
+Use branches de trabalho e pull requests para alterações em `main`. `develop` pode ser usada para integração quando acordado, mas deve ser comparada com `main` antes de um PR entre elas. Prefira commits como `feat:`, `fix:`, `docs:` e `test:` e referencie a issue aplicável. Confira a proteção de branches e os checks no GitHub. Guia completo em [docs/github.md](docs/github.md).
 
 Histórico: **0.1.0 (em desenvolvimento)** — primeira implementação do MVP; ainda não é uma release publicada. SemVer: MAJOR para incompatibilidade, MINOR para função compatível e PATCH para correção compatível.
