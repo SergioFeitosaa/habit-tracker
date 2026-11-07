@@ -1,15 +1,17 @@
 # Rastreabilidade
 
-Os números I01–I16 são identificadores locais de planejamento, **não** números de Issues já criadas no GitHub. Atualize-os após o cadastro real.
+Esta matriz conecta os requisitos em [requisitos.md](requisitos.md), as [histórias de usuário](user-stories.md), as issues do GitHub e as evidências no repositório. Os identificadores históricos I01–I16 do [backlog](issues.md) correspondem respectivamente às issues [#1](https://github.com/SergioFeitosaa/habit-tracker/issues/1)–[#16](https://github.com/SergioFeitosaa/habit-tracker/issues/16). Consulte o GitHub para o estado atual: uma issue fechada não prova que todas as validações manuais foram executadas.
 
-| Requisito | História | Backlog | Implementação / verificação |
-|---|---|---|---|
-| RF01 | US01 | I05, I06 | AuthController, AuthService; smoke HTTP |
-| RF02, RNF02 | US02, US07 | I06, I07, I13 | JwtService, JwtFilter, SecurityConfig, HabitService; JwtServiceTest e smoke |
-| RF03–RF06 | US03, US04 | I08, I10 | HabitController, HabitService, App.tsx (`src/main.tsx`); smoke |
-| RF07 | US05 | I09, I11 | HabitService, CompletionRepository, frontend; HabitServiceTest e smoke |
-| RF08–RF09 | US06 | I09, I11, I12 | HabitService, HabitController, frontend; smoke |
-| RNF01, RNF03 | US03 | I03, I04 | pom.xml, package.json, V1 migration; inicialização |
-| RNF04, RNF07 | — | I01, I02, I15 | README, .env.example, .gitignore, docs/github.md |
-| RNF05 | US06 | I10, I11 | frontend CSS e labels; revisão manual pendente |
-| RNF06 | US07 | I13, I14, I16 | JUnit, smoke, docs/qualidade.md, workflow CI |
+| Requisito | História | Issues | Implementação | Verificação e limites |
+|---|---|---|---|---|
+| RF01 | US01 | [#5](https://github.com/SergioFeitosaa/habit-tracker/issues/5), [#10](https://github.com/SergioFeitosaa/habit-tracker/issues/10) | `AuthController`, `AuthService`, `ApiDtos`, `frontend/src/main.tsx` | `ApiIntegrationIT`: entrada inválida e e-mail duplicado; `scripts/smoke_test.py`: cadastro HTTP. |
+| RF02, RNF02 | US02, US07 | [#6](https://github.com/SergioFeitosaa/habit-tracker/issues/6), [#7](https://github.com/SergioFeitosaa/habit-tracker/issues/7), [#13](https://github.com/SergioFeitosaa/habit-tracker/issues/13) | `JwtService`, `JwtFilter`, `SecurityConfig`, `AuthService`, `HabitService` | `JwtServiceTest` e `ApiIntegrationIT`: credenciais, token inválido, acesso anônimo e isolamento; smoke HTTP com duas contas. Não constitui auditoria de segurança. |
+| RF03–RF06 | US03, US04 | [#8](https://github.com/SergioFeitosaa/habit-tracker/issues/8), [#11](https://github.com/SergioFeitosaa/habit-tracker/issues/11) | `HabitController`, `HabitService`, `frontend/src/main.tsx` | `ApiIntegrationIT` e smoke HTTP exercitam criação, propriedade, arquivamento e histórico; smoke também cobre edição e listagem. |
+| RF07 | US05 | [#9](https://github.com/SergioFeitosaa/habit-tracker/issues/9), [#11](https://github.com/SergioFeitosaa/habit-tracker/issues/11) | `HabitService`, `CompletionRepository`, migration `V1__initial.sql` | `HabitServiceTest`, `ApiIntegrationIT` e smoke HTTP: idempotência sequencial e datas futuras; concorrência ainda não foi validada. |
+| RF08 | US06 | [#9](https://github.com/SergioFeitosaa/habit-tracker/issues/9), [#11](https://github.com/SergioFeitosaa/habit-tracker/issues/11) | `HabitController`, `HabitService`, `frontend/src/main.tsx` | `ApiIntegrationIT` e smoke HTTP consultam datas e total; histórico após arquivamento é exercitado. |
+| RF09, RNF05 | US06 | [#10](https://github.com/SergioFeitosaa/habit-tracker/issues/10), [#11](https://github.com/SergioFeitosaa/habit-tracker/issues/11), [#12](https://github.com/SergioFeitosaa/habit-tracker/issues/12) | `frontend/src/main.tsx`, `frontend/src/style.css`, `frontend/vite.config.ts` | Build TypeScript/Vite no CI; verificação manual da interface, responsividade e teclado requer evidência no navegador. |
+| RNF01, RNF03 | US03 | [#3](https://github.com/SergioFeitosaa/habit-tracker/issues/3), [#4](https://github.com/SergioFeitosaa/habit-tracker/issues/4) | `backend/pom.xml`, `frontend/package.json`, migration `V1__initial.sql` | Build e execução de testes com PostgreSQL e Flyway no CI; persistência após reinício em Windows requer registro separado. |
+| RNF04, RNF07 | — | [#1](https://github.com/SergioFeitosaa/habit-tracker/issues/1), [#2](https://github.com/SergioFeitosaa/habit-tracker/issues/2), [#15](https://github.com/SergioFeitosaa/habit-tracker/issues/15) | `README.md`, `docs/github.md`, `.gitignore` | Instruções e fluxo documentados; regras de proteção devem ser conferidas nas configurações do GitHub. |
+| RNF06 | US07 | [#13](https://github.com/SergioFeitosaa/habit-tracker/issues/13), [#14](https://github.com/SergioFeitosaa/habit-tracker/issues/14), [#16](https://github.com/SergioFeitosaa/habit-tracker/issues/16) | `backend/src/test`, `scripts/smoke_test.py`, `.github/workflows/ci.yml`, `docs/qualidade.md` | Unitários, integração e smoke executados no CI; embora #14 esteja fechada, não há resultado do roteiro completo no Windows registrado na issue. |
+
+`ApiIntegrationIT` usa MockMvc com o contexto real do Spring e PostgreSQL; é executado na fase `verify` do Maven. Os testes não substituem o smoke com servidor HTTP real nem a validação da interface. Para resultados de cada commit consulte o job correspondente na aba **Actions**. O roteiro de validação manual está em [validacao-windows.md](validacao-windows.md).
