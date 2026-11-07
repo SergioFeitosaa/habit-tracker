@@ -5,7 +5,7 @@ Este roteiro complementa o CI e cobre as issues [#10](https://github.com/SergioF
 ## Preparação
 
 - Use uma cópia atualizada da `main`, sem alterações locais pendentes que possam ser sobrescritas. Confira o commit com `git rev-parse --short HEAD`.
-- No Windows, siga os pré-requisitos e as seções de PostgreSQL, backend e frontend do [README](../README.md). São necessários Java 21, Maven, Node.js 22.12 ou superior e PostgreSQL.
+- No Windows, siga os pré-requisitos e as seções de PostgreSQL, backend e frontend do [README](../README.md). São necessários Java 21, Maven, Node.js 22.13 ou superior na linha 22, ou 24 ou superior e PostgreSQL.
 - Use exclusivamente banco e contas de **teste**. O roteiro cria e altera dados; não use banco de produção.
 - Não compartilhe senhas, tokens, dados pessoais, arquivos `.env` ou logs contendo segredos. Use endereços de teste fictícios.
 - Deixe o backend e o frontend rodando em terminais separados. Acesse `http://localhost:5173` no navegador da própria máquina.

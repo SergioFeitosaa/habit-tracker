@@ -10,7 +10,7 @@ Implementadas no código: cadastro, login, criação/listagem/detalhes/edição/
 Planejadas: recuperação de senha, restauração de hábitos, testes de integração adicionais, documentação OpenAPI, indicadores avançados e endurecimento de segurança. O CI valida backend e frontend no GitHub Actions; não há implantação automática.
 
 ## Tecnologias e pré-requisitos
-- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22.12 ou superior** (recomendado: versão LTS) e npm.
+- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22.13 ou superior na linha 22**, ou **24 ou superior** (recomendado: versão LTS) e npm.
 - PostgreSQL 16 recomendado (17 foi usado no teste e gera aviso de compatibilidade do Flyway). Serviço em execução na porta 5432.
 - Spring Boot 3, Spring Security, JPA, Hibernate, Flyway, PostgreSQL, JWT; React, TypeScript, Vite.
 - Acesso à internet para instalar dependências. As instruções abaixo usam Maven instalado no sistema; não há Maven Wrapper.
@@ -81,6 +81,8 @@ mvn test
 # Usa um banco exclusivo de teste; nunca use produção.
 mvn verify
 # Em frontend
+npm run lint
+npm run format:check
 npm run build
 # Opcional: com Python 3 instalado e backend rodando; cria duas contas de teste no banco de desenvolvimento
 cd ..
@@ -91,7 +93,7 @@ O smoke test usa HTTP real, grava dados no banco e cobre cadastro/login, acesso 
 
 ## Integração contínua (CI)
 
-O workflow `.github/workflows/ci.yml` executa em pushes e pull requests para `main` e `develop`, e também pode ser iniciado manualmente na aba Actions. Ele roda os testes unitários e de integração e empacota o backend com Java 21, executa o smoke test HTTP contra um PostgreSQL 16 isolado e compila o frontend com Node.js 22. Os relatórios dos testes unitários e de integração ficam disponíveis como artefato por 7 dias. Não são necessários secrets: as credenciais usadas no CI são temporárias e exclusivas do ambiente de teste.
+O workflow `.github/workflows/ci.yml` executa em pushes e pull requests para `main` e `develop`, e também pode ser iniciado manualmente na aba Actions. Ele roda os testes unitários e de integração e empacota o backend com Java 21, executa o smoke test HTTP contra um PostgreSQL 16 isolado e verifica lint, formatação e compilação do frontend com Node.js 22. Os relatórios dos testes unitários e de integração ficam disponíveis como artefato por 7 dias. Não são necessários secrets: as credenciais usadas no CI são temporárias e exclusivas do ambiente de teste.
 
 O CI também inventaria e consulta advisories das dependências Maven nas execuções do workflow; veja [gestão de dependências](docs/dependencias.md) para resultados e limitações. O CI não faz deploy nem substitui testes de interface no navegador. Para impedir merges com falhas, configure uma regra de proteção para exigir os checks **Backend (Java 21, PostgreSQL 16)** e **Frontend (Node.js 22)** no GitHub; a disponibilidade depende do plano e das configurações do repositório.
 
