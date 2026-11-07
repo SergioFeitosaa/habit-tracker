@@ -54,6 +54,16 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: backend/pom.xml
+      - name: Set up Node.js for Java formatting
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install Java formatting tools
+        run: npm ci
+      - name: Check Java formatting
+        run: npm run format:check
       - name: Run unit and integration tests and package
         run: mvn --batch-mode --no-transfer-progress -DfailIfNoTests=true clean verify
       - name: Run HTTP smoke test against PostgreSQL
