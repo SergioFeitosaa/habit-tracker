@@ -1,25 +1,19 @@
-# Publicação e Git Flow simplificado
+# Fluxo Git e GitHub
 
-A integração GitHub não está disponível nesta conversa; os passos precisam ser feitos por você. Não envie senhas ou tokens no chat. Primeiro inspecione `git status` e confirme que nenhum segredo está incluído. O repositório público será visível a todos.
+O repositório já existe e a branch padrão é `main`. Consulte o estado real das branches, pull requests e configurações no GitHub antes de agir; não execute `git init` nem recrie o repositório para contribuir.
 
-1. No GitHub, clique **New repository**, nome `habit-tracker`, visibilidade Public. Para evitar históricos divergentes, não inicialize README, licença ou .gitignore pelo site.
-2. Na pasta raiz, no PowerShell, configure seu nome e e-mail do Git caso ainda não os tenha configurado. Então:
+## Fluxo de alteração
 
-```powershell
-git init -b develop
-git add .
-git status
-git commit -m "chore: inicializa MVP habit tracker"
-git remote add origin https://github.com/SEU_USUARIO/habit-tracker.git
-git push -u origin develop
-```
+1. Confira o estado local com `git status` e atualize a branch de destino sem sobrescrever mudanças locais. Crie uma branch de trabalho a partir dela.
+2. Implemente uma mudança coesa, inclua testes e documentação e revise o diff para evitar envio de segredos ou arquivos gerados. Nunca envie senhas ou tokens no chat.
+3. Use commits claros, preferencialmente Conventional Commits, e referencie uma issue quando aplicável. Faça push da branch de trabalho e abra um PR para a branch de destino.
+4. Revise as alterações e os checks de backend e frontend. A auditoria de dependências gera avisos para triagem e não bloqueia automaticamente o CI. Vincule `Closes #n` somente se a entrega satisfizer os critérios da issue.
+5. Após validação, integre por PR. `main` deve permanecer protegida; confirme a configuração em **Settings → Branches / Rules** e exija os checks de backend e frontend. Disponibilidade de regras depende do plano e das permissões.
 
-Substitua `SEU_USUARIO`; use autenticação segura do GitHub (por exemplo Git Credential Manager). Se a pasta já tiver `.git`, não repita `git init`; confira `git branch` e `git remote -v` antes de prosseguir.
-3. No GitHub, crie a branch `main` a partir de `develop` pela interface; isso cria a referência inicial, sem novo commit direto na main. Em Settings → Branches / Rules, defina `main` como branch padrão e proteja `main` e, quando possível, `develop`: exigir PR, checks e impedir pushes diretos. Disponibilidade de proteções depende do plano e das configurações.
-4. Crie as labels mencionadas em `docs/issues.md`, depois abra as 16 Issues copiando título e corpo. Atualize os IDs locais com os números reais. Não marque como concluídas sem validar o aceite.
-5. Para trabalho posterior: `git switch develop; git pull; git switch -c feature/NUMERO-descricao`. Faça commits, por exemplo `feat: registra conclusão diária (#NUMERO)`. Envie `git push -u origin feature/NUMERO-descricao`; abra PR para develop com `Closes #NUMERO` no corpo quando o PR realmente concluir a Issue. Após aprovação/testes, faça PR de develop para main. Para correções use `fix/NUMERO-descricao` e `fix:`. Evite fechamento automático prematuro quando várias Issues dependem da mesma entrega.
-6. Quando validado, crie uma release/tag SemVer pela interface a partir de main, por exemplo `v0.1.0`. O projeto ainda não possui release publicada; não apresente o número de versão do código como uma tag já criada.
+`develop` pode ser usada como branch de integração quando acordado, mas sua existência não garante que esteja sincronizada com `main`. Antes de abrir um PR entre elas, compare os históricos e as alterações para evitar reintroduzir arquivos antigos ou desfazer correções. Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para detalhes dos testes.
 
-## Cadastrar backlog pelo GitHub CLI (alternativa ao cadastro manual)
+## Issues e versões
 
-Instale [GitHub CLI](https://cli.github.com/), abra um novo PowerShell e execute `gh auth login` para autenticar no navegador. Não compartilhe tokens no chat. Após publicar o repositório conforme acima, execute na raiz `powershell -ExecutionPolicy Bypass -File .\scripts\cadastrar-issues.ps1`. O script pede confirmação do repositório, cria labels ausentes e cadastra as Issues; se interrompido, pode ser executado novamente e ignora títulos existentes (consulta até 1.000 Issues). Revise os números reais e atualize `rastreabilidade.md`. Após modificar arquivos, faça commit numa feature branch e abra PR para develop; não altere diretamente main.
+As issues do backlog original já existem no GitHub e estão vinculadas em [rastreabilidade.md](rastreabilidade.md). Antes de criar uma issue, procure tarefas existentes; status fechado não substitui evidência de validação. O script `scripts/cadastrar-issues.ps1` é histórico: antes de usá-lo, verifique seu impacto e evite duplicação.
+
+Os manifests indicam a versão de desenvolvimento `0.1.0`; isso não significa que uma tag ou release tenha sido publicada. Só crie uma versão SemVer após validar os critérios de entrega e registrar as alterações no [CHANGELOG](../CHANGELOG.md).

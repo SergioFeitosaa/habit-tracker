@@ -1,6 +1,6 @@
 # Backlog de Issues
 
-Identificadores I01–I16 são locais; ainda não representam Issues cadastradas no GitHub. Copie cada título e corpo; crie as labels no repositório. Estado de implementação deve ser verificado antes de fechar.
+Este documento preserva o backlog original I01–I16. Os identificadores correspondem às issues GitHub [#1](https://github.com/SergioFeitosaa/habit-tracker/issues/1)–[#16](https://github.com/SergioFeitosaa/habit-tracker/issues/16), respectivamente. Consulte o GitHub para o estado atual; as caixas abaixo são o registro original dos critérios, não um painel de status. Veja a [matriz de rastreabilidade](rastreabilidade.md) e confirme a evidência de cada validação.
 
 ## I01 — Configurar repositório e proteção de branches
 
