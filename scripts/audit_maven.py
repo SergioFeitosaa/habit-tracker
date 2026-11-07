@@ -74,7 +74,11 @@ def main():
             ghsa = safe(advisory.get('ghsa_id', 'desconhecido'))
             url = advisory.get('html_url', '')
             report.append(f"| {safe(package)} | {safe(advisory.get('severity', 'desconhecida'))} | [{ghsa}]({url}) | {safe(advisory.get('summary', ''))} |")
-            print(f"::warning::{safe(package)}: {ghsa} ({safe(advisory.get('severity', 'desconhecida'))})")
+        # GitHub limits individual warning annotations per step. Combine findings so
+        # the annotations expose the complete triage list rather than just ten.
+        details = [f"{safe(package)}: {safe(item.get('ghsa_id', 'desconhecido'))} ({safe(item.get('severity', 'desconhecida'))})" for package, item in findings]
+        message = "; ".join(details).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::warning::Advisories para triagem: {message}")
     else:
         report.append('Nenhum advisory retornado para as versões consultadas. Isso não garante ausência de vulnerabilidades.')
     text = '\n'.join(report) + '\n'
