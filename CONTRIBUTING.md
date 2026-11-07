@@ -12,7 +12,7 @@ Obrigado pelo interesse no Habit Tracker. Mudanças pequenas, com objetivo e cri
 
 - Faça commits coesos no formato Conventional Commits, por exemplo `fix: valida data futura` ou `docs: atualiza rastreabilidade`. Referencie a issue relevante quando existir.
 - Atualize os testes e a documentação afetada. Para comandos completos e pré-requisitos, consulte o [README](README.md).
-- No backend, `mvn test` executa testes unitários; `mvn verify` inclui integração com PostgreSQL. Use **um banco isolado de teste**, com variáveis `DB_*` e `JWT_SECRET` configuradas; Flyway pode alterar seu schema. Nunca use produção.
+- No backend, `npm ci` instala a ferramenta de formatação Java; `npm run format` aplica o formato e `npm run format:check` o verifica. `mvn test` executa o Checkstyle e os testes unitários; `mvn verify` inclui integração com PostgreSQL. Use **um banco isolado de teste**, com variáveis `DB_*` e `JWT_SECRET` configuradas; Flyway pode alterar seu schema. Nunca use produção.
 - No frontend, execute `npm ci`, `npm run lint`, `npm run format:check` e `npm run build`. Use `npm run format` para aplicar o formato. O build não substitui o teste da interface no navegador.
 - Quando alterar requisitos, comportamento ou fluxos, atualize as histórias, a [rastreabilidade](docs/rastreabilidade.md) e demais documentos impactados.
 

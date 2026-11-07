@@ -5,6 +5,7 @@ Mudanças relevantes serão registradas aqui seguindo a estrutura de [Keep a Cha
 ## Não lançado
 
 ### Adicionado
+- Checkstyle e verificação de formatação Java no backend e no CI.
 - Lint e verificação de formatação do frontend no CI.
 - Testes de integração da API com Spring, MockMvc e PostgreSQL para autenticação, isolamento e regras de hábitos.
 - Guia de contribuição, índice de documentação e templates de issues e pull requests.

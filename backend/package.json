@@ -1,0 +1,17 @@
+{
+  "name": "habit-tracker-backend-quality",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ferramentas de formata\u00e7\u00e3o Java do backend",
+  "scripts": {
+    "format": "prettier --plugin=prettier-plugin-java --write \"src/**/*.java\"",
+    "format:check": "prettier --plugin=prettier-plugin-java --check \"src/**/*.java\""
+  },
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "prettier-plugin-java": "^2.11.0"
+  }
+}
