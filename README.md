@@ -1,6 +1,6 @@
 # Habit Tracker
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.13-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.16-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 
 MVP acadêmico para criar hábitos diários e registrar realizações. A API usa autenticação JWT e separa dados por usuário. Este é um projeto de estudo para execução local, não um serviço pronto para produção.
 
@@ -84,7 +84,7 @@ cd ..
 python scripts/smoke_test.py
 ```
 
-O smoke test usa HTTP real, grava dados no banco e cobre cadastro/login, acesso não autorizado, isolamento, hábitos, datas futuras, idempotência, histórico e arquivamento. Não o execute em banco de produção. Roteiro manual: cadastre, entre, crie e edite um hábito, registre e desmarque uma data, consulte o histórico, arquive e consulte a aba arquivados; reinicie os processos e faça login para verificar persistência. Teste também com uma segunda conta. A consulta de histórico é limitada ao período selecionado.
+O smoke test usa HTTP real, grava dados no banco e cobre cadastro/login, acesso não autorizado, isolamento, hábitos, datas futuras, idempotência, histórico e arquivamento. Não o execute em banco de produção. Para validar a interface e a persistência no Windows, siga o [roteiro manual de validação](docs/validacao-windows.md). A consulta de histórico é limitada ao período selecionado.
 
 ## Integração contínua (CI)
 
