@@ -10,7 +10,7 @@ Implementadas no código: cadastro, login, criação/listagem/detalhes/edição/
 Planejadas: recuperação de senha, restauração de hábitos, testes de integração adicionais, documentação OpenAPI, indicadores avançados e endurecimento de segurança. O CI valida backend e frontend no GitHub Actions; não há implantação automática.
 
 ## Tecnologias e pré-requisitos
-- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22 LTS** e npm.
+- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22.12 ou superior** (recomendado: versão LTS) e npm.
 - PostgreSQL 16 recomendado (17 foi usado no teste e gera aviso de compatibilidade do Flyway). Serviço em execução na porta 5432.
 - Spring Boot 3, Spring Security, JPA, Hibernate, Flyway, PostgreSQL, JWT; React, TypeScript, Vite.
 - Acesso à internet para instalar dependências. As instruções abaixo usam Maven instalado no sistema; não há Maven Wrapper.
