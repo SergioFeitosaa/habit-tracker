@@ -2,7 +2,7 @@
 
 ## Inventário e análise
 
-O job de backend no CI exporta `dependency-tree.json` com a árvore resolvida do Maven, incluindo dependências transitivas e de teste. O script `scripts/audit_maven.py` consulta a API pública do GitHub Advisory Database para cada coordenada e versão resolvida, gera `dependency-audit.md` e registra avisos quando encontra advisories. Os dois arquivos são publicados no artefato `backend-dependency-audit`, com retenção de 30 dias. A execução ocorre em PRs para `main`/`develop`, pushes nessas branches, manualmente e semanalmente na branch padrão.
+O job de backend no CI exporta `dependency-tree.json` com a árvore resolvida do Maven, incluindo dependências transitivas e de teste. O script `scripts/audit_maven.py` consulta a API pública do GitHub Advisory Database para cada coordenada e versão resolvida, gera `dependency-audit.md` e registra avisos quando encontra advisories. Os dois arquivos são publicados no artefato `backend-dependency-audit`, com retenção de 30 dias. A execução ocorre em PRs para `main`/`develop`, pushes nessas branches e quando iniciada manualmente. Não há execução semanal agendada.
 
 Os achados **não falham o job automaticamente**: precisam ser triados para determinar escopo, condições de exploração e atualização segura. Falha na obtenção da árvore ou na consulta à API falha o job, para não confundir erro de consulta com análise limpa. A ausência de advisories não garante segurança: o catálogo pode não conter todos os problemas, e não cobre configuração, código próprio ou necessariamente todo componente distribuído fora da árvore Maven. Dependências de teste são incluídas e devem ser avaliadas no contexto do CI.
 
@@ -18,7 +18,7 @@ Consultas não autenticadas têm limite menor na API. Opcionalmente, use autenti
 
 ## Acompanhamento contínuo
 
-`.github/dependabot.yml` solicita propostas semanais de atualização para Maven, npm e GitHub Actions, após entrar na branch padrão. PRs devem ser revisados e testados; atualizações automáticas não garantem correção nem substituem a triagem de alertas. Em **Settings → Code security** habilite o dependency graph e os alertas de segurança do Dependabot; permissões administrativas podem ser necessárias. A configuração de version updates não os habilita automaticamente. Confira a aba Security e os resultados do CI periodicamente.
+Não há configuração de propostas semanais do Dependabot neste projeto. Alertas de segurança do Dependabot são uma configuração independente no GitHub; o usuário pode ativá-los ou desativá-los em **Settings → Code security**, conforme sua preferência. Sem alertas automáticos ou análises agendadas, novas vulnerabilidades podem passar despercebidas até a próxima execução do CI ou revisão manual. Consulte os resultados do CI e execute `npm audit` periodicamente quando decidir revisar as dependências.
 
 ## Suporte e risco residual
 
