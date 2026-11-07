@@ -7,10 +7,10 @@ MVP acadêmico para criar hábitos diários e registrar realizações. A API usa
 ## Funcionalidades
 Implementadas no código: cadastro, login, criação/listagem/detalhes/edição/arquivamento de hábitos, registro e remoção de realizações, histórico por período e total de dias. Hábitos arquivados permanecem consultáveis com seu histórico. Sessão fica apenas na memória do navegador e termina ao recarregar a página.
 
-Planejadas: recuperação de senha, restauração de hábitos, testes de integração automatizados, documentação OpenAPI, indicadores avançados e endurecimento de segurança. CI é fornecida mas ainda precisa rodar no GitHub; não há implantação automática.
+Planejadas: recuperação de senha, restauração de hábitos, testes de integração adicionais, documentação OpenAPI, indicadores avançados e endurecimento de segurança. O CI valida backend e frontend no GitHub Actions; não há implantação automática.
 
 ## Tecnologias e pré-requisitos
-- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **20 LTS ou 22 LTS** e npm.
+- Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22 LTS** e npm.
 - PostgreSQL 16 recomendado (17 foi usado no teste e gera aviso de compatibilidade do Flyway). Serviço em execução na porta 5432.
 - Spring Boot 3, Spring Security, JPA, Hibernate, Flyway, PostgreSQL, JWT; React, TypeScript, Vite.
 - Acesso à internet para instalar dependências. As instruções abaixo usam Maven instalado no sistema; não há Maven Wrapper.
@@ -85,6 +85,12 @@ python scripts/smoke_test.py
 ```
 
 O smoke test usa HTTP real, grava dados no banco e cobre cadastro/login, acesso não autorizado, isolamento, hábitos, datas futuras, idempotência, histórico e arquivamento. Não o execute em banco de produção. Roteiro manual: cadastre, entre, crie e edite um hábito, registre e desmarque uma data, consulte o histórico, arquive e consulte a aba arquivados; reinicie os processos e faça login para verificar persistência. Teste também com uma segunda conta. A consulta de histórico é limitada ao período selecionado.
+
+## Integração contínua (CI)
+
+O workflow `.github/workflows/ci.yml` executa em pushes e pull requests para `main` e `develop`, e também pode ser iniciado manualmente na aba Actions. Ele roda os testes e empacota o backend com Java 21, executa o smoke test HTTP contra um PostgreSQL 16 isolado e compila o frontend com Node.js 22. Os relatórios dos testes unitários ficam disponíveis como artefato por 7 dias. Não são necessários secrets: as credenciais usadas no CI são temporárias e exclusivas do ambiente de teste.
+
+O CI não faz deploy nem substitui testes de interface no navegador. Para impedir merges com falhas, configure uma regra de proteção para exigir os checks **Backend (Java 21, PostgreSQL 16)** e **Frontend (Node.js 22)** no GitHub; a disponibilidade depende do plano e das configurações do repositório.
 
 ## Segurança e limites
 BCrypt, JWT de 8 horas, verificação por dono no backend, validação e CORS configurável. `localStorage` não é usado; o token fica em memória. Senhas, tokens e `.env` não devem ser enviados ao Git. Em produção seriam necessários HTTPS, limitação de tentativas, revogação/rotação de tokens, políticas de senha, auditoria, tratamento mais completo e avaliação de dependências. Não existe SLA ou benchmark de desempenho; veja `docs/qualidade.md`.
