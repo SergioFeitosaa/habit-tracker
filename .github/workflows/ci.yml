@@ -1,31 +1,119 @@
 name: CI
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
+
 permissions:
   contents: read
+
+# Cancel obsolete runs for the same PR or branch, without affecting other runs.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
+    name: Backend (Java 21, PostgreSQL 16)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: habit_tracker
+          POSTGRES_USER: habit_user
+          POSTGRES_PASSWORD: ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U habit_user -d habit_tracker"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Disposable credentials for the isolated CI database and application only.
+      DB_URL: jdbc:postgresql://localhost:5432/habit_tracker
+      DB_USER: habit_user
+      DB_PASSWORD: ci-password
+      JWT_SECRET: ci-only-secret-at-least-32-characters-long
+      APP_TIMEZONE: America/Recife
+    defaults:
+      run:
+        working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: mvn --batch-mode test
-        working-directory: backend
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+          cache-dependency-path: backend/pom.xml
+      - name: Run unit tests and package
+        run: mvn --batch-mode --no-transfer-progress -DfailIfNoTests=true clean verify
+      - name: Run HTTP smoke test against PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          jars=(target/*.jar)
+          if [ "${#jars[@]}" -ne 1 ]; then
+            echo "Expected exactly one packaged application jar."
+            exit 1
+          fi
+          java -jar "${jars[0]}" > "$RUNNER_TEMP/backend.log" 2>&1 &
+          app_pid=$!
+          cleanup() {
+            status=$?
+            if [ "$status" -ne 0 ]; then cat "$RUNNER_TEMP/backend.log"; fi
+            kill "$app_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          ready=false
+          for attempt in {1..60}; do
+            if curl --silent --output /dev/null http://localhost:8080/api/habits; then
+              ready=true
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then break; fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "Backend did not start in time."
+            exit 1
+          fi
+          python3 ../scripts/smoke_test.py
+      - name: Upload unit test reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          node-version: '20'
+          name: backend-test-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  frontend:
+    name: Frontend (Node.js 22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: npm ci && npm run build
-        working-directory: frontend
+      - name: Install dependencies
+        run: npm ci
+      - name: Type-check and build
+        run: npm run build
