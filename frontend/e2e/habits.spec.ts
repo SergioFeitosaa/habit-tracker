@@ -211,3 +211,73 @@ test("fluxo principal pode ser operado pelo teclado", async ({ page }) => {
     page.getByRole("heading", { name: "Acesse sua conta" }),
   ).toBeVisible();
 });
+
+test("credenciais inválidas permitem nova tentativa", async ({ page }) => {
+  const email = `e2e-${randomUUID()}@example.com`;
+  await page.goto("/");
+  await register(page, email);
+  await page.getByLabel("E-mail").fill(email);
+  await page.getByLabel("Senha").fill("senha-incorreta");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "E-mail ou senha inválidos.",
+  );
+  await expect(page.getByLabel("E-mail")).toHaveValue(email);
+  await login(page, email);
+});
+
+test("falhas de conexão e serviço preservam o rascunho e permitem recuperação", async ({
+  page,
+}) => {
+  const email = `e2e-${randomUUID()}@example.com`;
+  await page.goto("/");
+  await register(page, email);
+  await login(page, email);
+  const name = page.getByLabel("Nome do hábito");
+  await name.fill("Rascunho de teste");
+  await page.getByLabel("Descrição").fill("Não perder");
+  await page.route("**/api/habits", (route) => route.abort("failed"), {
+    times: 1,
+  });
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Não foi possível confirmar a operação",
+  );
+  await expect(name).toHaveValue("Rascunho de teste");
+  await expect(page.getByLabel("Descrição")).toHaveValue("Não perder");
+  await page.route("**/api/habits", (route) => route.fulfill({ status: 503 }), {
+    times: 1,
+  });
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await expect(page.getByRole("status")).toContainText("Serviço indisponível");
+  await expect(name).toHaveValue("Rascunho de teste");
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await expect(
+    page.getByRole("button", { name: "Consultar Rascunho de teste" }),
+  ).toBeVisible();
+});
+
+test("resposta de sessão inválida informa como preservar rascunho", async ({
+  page,
+}) => {
+  const email = `e2e-${randomUUID()}@example.com`;
+  await page.goto("/");
+  await register(page, email);
+  await login(page, email);
+  const name = page.getByLabel("Nome do hábito");
+  await name.fill("Rascunho da sessão");
+  await page.route("**/api/habits", (route) => route.fulfill({ status: 401 }), {
+    times: 1,
+  });
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Sessão inválida ou expirada",
+  );
+  await expect(page.getByRole("status")).toContainText("Copie os rascunhos");
+  await expect(name).toHaveValue("Rascunho da sessão");
+  await page.getByRole("button", { name: "Sair" }).click();
+  await login(page, email);
+  await expect(
+    page.getByRole("heading", { name: "Novo hábito" }),
+  ).toBeVisible();
+});

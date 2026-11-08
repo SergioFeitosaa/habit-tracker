@@ -21,15 +21,38 @@ async function api<T>(
   method = "GET",
   body?: object,
 ): Promise<T> {
-  const r = await fetch("/api" + path, {
-    method,
-    headers: {
-      ...(body ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let r: Response;
+  try {
+    r = await fetch("/api" + path, {
+      method,
+      headers: {
+        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error(
+      method === "GET"
+        ? "Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente."
+        : "Não foi possível confirmar a operação. Verifique sua conexão e confira os dados antes de tentar novamente.",
+    );
+  }
   if (!r.ok) {
+    if (r.status === 401) {
+      throw new Error(
+        token
+          ? "Sessão inválida ou expirada. Copie os rascunhos não salvos antes de sair e entrar novamente."
+          : "E-mail ou senha inválidos.",
+      );
+    }
+    if (r.status >= 500) {
+      throw new Error(
+        method === "GET"
+          ? "Serviço indisponível. Tente novamente mais tarde."
+          : "Serviço indisponível. Não foi possível confirmar a operação; confira os dados antes de tentar novamente.",
+      );
+    }
     let msg = `Erro ${r.status}. Tente novamente.`;
     try {
       const x = await r.json();
@@ -37,7 +60,6 @@ async function api<T>(
     } catch {
       // Use the generic error message when the response is not JSON.
     }
-    if (r.status === 401) msg = "Sessão expirada ou credenciais inválidas.";
     throw new Error(msg);
   }
   const text = await r.text();
