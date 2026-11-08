@@ -16,4 +16,4 @@ O repositório já existe e a branch padrão é `main`. Consulte o estado real d
 
 As issues do backlog original já existem no GitHub e estão vinculadas em [rastreabilidade.md](rastreabilidade.md). Antes de criar uma issue, procure tarefas existentes; status fechado não substitui evidência de validação. O script `scripts/cadastrar-issues.ps1` é histórico: antes de usá-lo, verifique seu impacto e evite duplicação.
 
-Os manifests indicam a versão de desenvolvimento `0.1.0`; isso não significa que uma tag ou release tenha sido publicada. Só crie uma versão SemVer após validar os critérios de entrega e registrar as alterações no [CHANGELOG](../CHANGELOG.md).
+Os manifests indicam a versão de desenvolvimento `0.1.0`; isso não significa que uma tag ou release tenha sido publicada. Antes de decidir uma versão, use o [checklist de preparação da entrega](preparacao-entrega.md) para registrar evidências e limitações. Só crie uma versão SemVer após validar os critérios de entrega, registrar as alterações no [CHANGELOG](../CHANGELOG.md) e obter decisão explícita para publicar.
