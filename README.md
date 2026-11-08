@@ -119,7 +119,7 @@ O CI usa credenciais descartáveis, não faz deploy e não possui execução sem
 BCrypt, JWT de 8 horas, verificação por dono no backend, validação e CORS configurável. `localStorage` não é usado; o token fica em memória. Senhas, tokens e `.env` não devem ser enviados ao Git. Antes de produção, são necessários HTTPS, limitação de tentativas, revogação/rotação de tokens, políticas de senha, auditoria, tratamento mais completo e revisão dos advisories pendentes do Spring descritos em [gestão de dependências](docs/dependencias.md). Não existe SLA ou benchmark de desempenho; veja `docs/qualidade.md`.
 
 ## Documentação e API
-- [Índice da documentação](docs/README.md), [guia de contribuição](CONTRIBUTING.md) e [changelog](CHANGELOG.md).
+- [Índice da documentação](docs/README.md), [guia de contribuição](CONTRIBUTING.md), [changelog](CHANGELOG.md) e [preparação da entrega](docs/preparacao-entrega.md).
 - [Termo de abertura](docs/project-charter.md), [requisitos e regras](docs/requisitos.md), [casos de uso](docs/casos-de-uso.md), [histórias](docs/user-stories.md), [arquitetura](docs/arquitetura.md), [modelo de dados](docs/modelo-dados.md), [rastreabilidade](docs/rastreabilidade.md), [qualidade](docs/qualidade.md), [backlog de Issues](docs/issues.md) e [publicação GitHub](docs/github.md).
 - API: `POST /api/auth/register`, `POST /api/auth/login`, `GET/POST /api/habits`, `GET/PUT/DELETE /api/habits/{id}` (DELETE arquiva), `PUT/DELETE /api/habits/{id}/completions/{yyyy-MM-dd}`, `GET /api/habits/{id}/completions?from=yyyy-MM-dd&to=yyyy-MM-dd`. Envie `Authorization: Bearer <token>` nas rotas de hábitos. Para arquivados, `GET /api/habits?archived=true`.
 

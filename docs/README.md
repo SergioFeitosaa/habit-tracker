@@ -7,6 +7,7 @@
 - [Rastreabilidade](rastreabilidade.md) e [backlog original](issues.md): requisitos, issues, código e testes.
 - [Qualidade](qualidade.md), [validação Windows](validacao-windows.md) e [dependências](dependencias.md): estratégia e riscos.
 - [Fluxo Git e GitHub](github.md): colaboração, branches e releases.
+- [Preparação da entrega](preparacao-entrega.md): checklist de evidências e pendências para a versão de demonstração local.
 
 ## Manter documentação e código sincronizados
 
