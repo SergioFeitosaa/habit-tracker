@@ -10,6 +10,9 @@ Mudanças relevantes serão registradas aqui seguindo a estrutura de [Keep a Cha
 - Testes de integração da API com Spring, MockMvc e PostgreSQL para autenticação, isolamento e regras de hábitos.
 - Guia de contribuição, índice de documentação e templates de issues e pull requests.
 
+### Corrigido
+- Marcações simultâneas da mesma realização usam inserção atômica no PostgreSQL.
+
 ### Alterado
 - Matriz de rastreabilidade vinculada às issues do GitHub e às evidências de implementação e teste.
 - Documentação de Git atualizada para refletir um repositório já existente.

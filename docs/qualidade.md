@@ -1,11 +1,12 @@
 # Qualidade, DevSecOps e desempenho
 
 ## Plano de testes
-- Unitário: `HabitServiceTest` verifica data futura, isolamento, idempotência, intervalo inválido e hábito arquivado; `JwtServiceTest` verifica assinatura, adulteração e segredo curto.
+- Unitário: `HabitServiceTest` verifica data futura, isolamento, uso da inserção atômica, intervalo inválido e hábito arquivado; `JwtServiceTest` verifica assinatura, adulteração e segredo curto.
 - Integração Spring com PostgreSQL: `ApiIntegrationIT` usa MockMvc, autenticação e repositórios reais; `mvn verify` executa os testes em transações revertidas. Use banco exclusivo de teste; Flyway pode alterar o schema.
+- Concorrência: `ConcurrentCompletionIT` usa transações independentes no PostgreSQL para verificar duas marcações simultâneas da mesma data e o resultado HTTP. Não cobre corrida com arquivamento ou desmarcação.
 - Integração funcional HTTP com PostgreSQL: `scripts/smoke_test.py`, em ambiente de desenvolvimento, cria contas e cobre o fluxo descrito no README; executar com servidor iniciado. Também reiniciar backend e verificar persistência manualmente.
 - Interface: testar cadastro, login, campos obrigatórios, navegação por teclado, layout móvel, edição, arquivados, período e erros de rede. O build TypeScript/Vite não substitui teste no navegador.
-- O CI executa os testes de integração e o smoke test HTTP com PostgreSQL 16 isolado. Testes adicionais desejáveis: concorrência, expiração de token, acessibilidade com leitor de tela e testes end-to-end de navegador.
+- O CI executa os testes de integração e o smoke test HTTP com PostgreSQL 16 isolado. Testes adicionais desejáveis: concorrência com arquivamento e desmarcação, expiração de token, acessibilidade com leitor de tela e testes end-to-end de navegador.
 
 ## Segurança
 Segredos por variáveis de ambiente; BCrypt, JWT assinado e com expiração, CORS e autorização por dono. Checklist antes da publicação: confirmar `.gitignore`, verificar histórico para vazamentos, revisar dependências, habilitar proteção de branches e secret scanning. HTTPS, rate limit, política contra brute force, auditoria, tratamento de XSS e gestão de tokens são pendências para produção. Login responde igualmente a conta inexistente/senha incorreta, mas não foi avaliado quanto a timing.
