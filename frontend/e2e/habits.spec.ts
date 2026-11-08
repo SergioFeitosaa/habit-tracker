@@ -139,3 +139,75 @@ test("tela de entrada é utilizável em largura de celular", async ({ page }) =>
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(375);
 });
+
+test("fluxo principal pode ser operado pelo teclado", async ({ page }) => {
+  const email = `e2e-${randomUUID()}@example.com`;
+  await page.goto("/");
+  await register(page, email);
+  // Reload resets focus; the session is still unauthenticated after registration.
+  await page.reload();
+
+  async function tabTo(locator: ReturnType<Page["getByRole"]>) {
+    for (let attempt = 0; attempt < 25; attempt++) {
+      await page.keyboard.press("Tab");
+      if (
+        await locator.evaluate((element) => element === document.activeElement)
+      )
+        return;
+    }
+    throw new Error(`Não foi possível alcançar ${locator} usando Tab`);
+  }
+
+  const emailInput = page.getByLabel("E-mail");
+  await tabTo(emailInput);
+  await expect(emailInput).toBeFocused();
+  expect(
+    await emailInput.evaluate(
+      (element) => getComputedStyle(element).outlineStyle,
+    ),
+  ).not.toBe("none");
+  await page.keyboard.insertText(email);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Senha")).toBeFocused();
+  await page.keyboard.insertText(password);
+  await page.keyboard.press("Tab");
+  const signIn = page.getByRole("button", { name: "Entrar" });
+  await expect(signIn).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "Seus hábitos" }),
+  ).toBeVisible();
+
+  const name = page.getByLabel("Nome do hábito");
+  await tabTo(name);
+  await page.keyboard.insertText("Hábito via teclado");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Descrição")).toBeFocused();
+  await page.keyboard.press("Tab");
+  const add = page.getByRole("button", { name: "Adicionar hábito" });
+  await expect(add).toBeFocused();
+  expect(
+    await add.evaluate((element) => getComputedStyle(element).outlineStyle),
+  ).not.toBe("none");
+  await page.keyboard.press("Enter");
+  const habit = page.getByRole("button", {
+    name: "Consultar Hábito via teclado",
+  });
+  await expect(habit).toBeVisible();
+  await tabTo(habit);
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("Data da realização")).toBeVisible();
+  const mark = page.getByRole("button", { name: "Marcar ✓", exact: true });
+  await expect(mark).toBeEnabled();
+  await tabTo(mark);
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("status")).toContainText(
+    "Realização registrada.",
+  );
+  const signOut = page.getByRole("button", { name: "Sair" });
+  await tabTo(signOut);
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "Acesse sua conta" }),
+  ).toBeVisible();
+});
