@@ -281,3 +281,64 @@ test("resposta de sessão inválida informa como preservar rascunho", async ({
     page.getByRole("heading", { name: "Novo hábito" }),
   ).toBeVisible();
 });
+
+test("alterações confirmadas não são confundidas com falhas de atualização", async ({
+  page,
+}) => {
+  const email = `e2e-${randomUUID()}@example.com`;
+  await page.goto("/");
+  await register(page, email);
+  await login(page, email);
+  const refresh = page.getByRole("button", { name: "Atualizar lista" });
+  await expect(refresh).toBeEnabled();
+  await page.route(
+    "**/api/habits?*",
+    (route) => route.fulfill({ status: 503 }),
+    { times: 1 },
+  );
+  await page.getByLabel("Nome do hábito").fill("Salvo apesar da falha");
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Hábito salvo, mas a lista não foi atualizada.",
+  );
+  const habit = page.getByRole("button", {
+    name: "Consultar Salvo apesar da falha",
+  });
+  await expect(habit).toBeVisible();
+  await expect(page.getByLabel("Nome do hábito")).toHaveValue("");
+  await refresh.click();
+  await expect(habit).toHaveCount(1);
+  await habit.click();
+  const query = page.getByRole("button", { name: "Consultar período" });
+  await expect(query).toBeEnabled();
+  await page.route(
+    "**/api/habits/*/completions?*",
+    (route) => route.fulfill({ status: 503 }),
+    { times: 1 },
+  );
+  await page.getByRole("button", { name: "Marcar ✓", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Realização registrada, mas o histórico não foi atualizado.",
+  );
+  await expect(page.locator(".history")).toHaveCount(0);
+  await query.click();
+  await expect(page.getByText("1 dia concluído no período")).toBeVisible();
+  await page.route(
+    "**/api/habits?*",
+    (route) => route.fulfill({ status: 503 }),
+    { times: 1 },
+  );
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .locator("article")
+    .filter({ hasText: "Salvo apesar da falha" })
+    .getByRole("button", { name: "Arquivar" })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Hábito arquivado, mas a lista não foi atualizada.",
+  );
+  await expect(habit).toHaveCount(0);
+  await refresh.click();
+  await page.getByRole("button", { name: "Ver arquivados" }).click();
+  await expect(habit).toBeVisible();
+});
