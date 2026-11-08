@@ -103,7 +103,12 @@ jobs:
             exit 1
           fi
           python3 ../scripts/smoke_test.py
-          (cd ../frontend && npm run test:e2e)
+          if ! (cd ../frontend && npm run test:e2e) > "$RUNNER_TEMP/e2e.log" 2>&1; then
+            cat "$RUNNER_TEMP/e2e.log"
+            python3 -c 'import os, pathlib; s = pathlib.Path(os.environ["RUNNER_TEMP"], "e2e.log").read_text()[-6000:]; print("::error::" + s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A"))'
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/e2e.log"
       - name: Export resolved Maven dependency tree
         run: mvn --batch-mode --no-transfer-progress org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree -DoutputType=json -DoutputFile=target/dependency-tree.json
       - name: Check Maven dependencies against GitHub advisories
