@@ -43,7 +43,7 @@ async function api<T>(
   const text = await r.text();
   return (text ? JSON.parse(text) : undefined) as T;
 }
-function App() {
+function App({ onLogout }: { onLogout: () => void }) {
   const [token, setToken] = useState(""),
     [person, setPerson] = useState(""),
     [register, setRegister] = useState(false),
@@ -140,14 +140,6 @@ function App() {
       setMessage(on ? "Realização registrada." : "Realização removida.");
     });
   }
-  function logout() {
-    setToken("");
-    setPerson("");
-    setHabits([]);
-    setSelected(null);
-    setHistory(null);
-    setMessage("");
-  }
   return (
     <>
       <header>
@@ -158,7 +150,7 @@ function App() {
           {token && (
             <div className="account">
               <span>Olá, {person}</span>
-              <button className="ghost" onClick={logout}>
+              <button className="ghost" onClick={onLogout}>
                 Sair
               </button>
             </div>
@@ -524,8 +516,18 @@ function App() {
     </>
   );
 }
+function Root() {
+  const [session, setSession] = useState(0);
+  return (
+    <App
+      key={session}
+      onLogout={() => setSession((previous) => previous + 1)}
+    />
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <Root />
   </React.StrictMode>,
 );

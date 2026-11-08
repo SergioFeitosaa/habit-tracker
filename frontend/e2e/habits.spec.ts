@@ -62,6 +62,15 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
     page.getByRole("heading", { name: "Acesse sua conta" }),
   ).toBeVisible();
   await login(page, first);
+  await page.getByLabel("Nome do hábito").fill("Rascunho anterior");
+  await page.getByLabel("Descrição").fill("Descrição anterior");
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await page
+    .locator("article")
+    .filter({ hasText: "Rascunho anterior" })
+    .getByRole("button", { name: "Editar" })
+    .click();
+  await page.getByLabel("Nome do hábito").fill("Alteração não salva");
   await page.getByRole("button", { name: "Ver arquivados" }).click();
   await page
     .getByRole("button", { name: "Consultar Leitura editada E2E" })
@@ -72,9 +81,33 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
   await expect(page.getByText("1 dia concluído no período")).toBeVisible();
   await page.getByRole("button", { name: "Sair" }).click();
 
-  await page.reload();
+  await expect(page.getByLabel("E-mail")).toHaveValue("");
   await register(page, second);
   await login(page, second);
+  await expect(
+    page.getByRole("heading", { name: "Novo hábito" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Nome do hábito")).toHaveValue("");
+  await expect(page.getByLabel("Descrição")).toHaveValue("");
+  await expect(
+    page.getByRole("heading", { name: "Hábitos ativos" }),
+  ).toBeVisible();
+  await page.getByLabel("Nome do hábito").fill("Hábito da segunda conta");
+  await page.getByRole("button", { name: "Adicionar hábito" }).click();
+  await page
+    .getByRole("button", { name: "Consultar Hábito da segunda conta" })
+    .click();
+  const today = await page.evaluate(() =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Recife",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date()),
+  );
+  await expect(page.getByLabel("De", { exact: true })).toHaveValue(
+    today.slice(0, 8) + "01",
+  );
   await page.getByRole("button", { name: "Ver arquivados" }).click();
   await expect(
     page.getByRole("button", { name: "Consultar Leitura editada E2E" }),
