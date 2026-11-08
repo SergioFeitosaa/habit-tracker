@@ -2,12 +2,12 @@
 
 ![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.16-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 
-MVP acadêmico para criar hábitos diários e registrar realizações. A API usa autenticação JWT e separa dados por usuário. Este é um projeto de estudo para execução local, não um serviço pronto para produção.
+Aplicação web para criar hábitos diários e acompanhar realizações. A API usa autenticação JWT e separa dados por usuário. O MVP foi desenvolvido para execução local e não está pronto para produção.
 
 ## Funcionalidades
-Implementadas no código: cadastro, login, criação/listagem/detalhes/edição/arquivamento de hábitos, registro e remoção de realizações, histórico por período e total de dias. Hábitos arquivados permanecem consultáveis com seu histórico. Sessão fica apenas na memória do navegador e termina ao recarregar a página.
+Implementadas no código: cadastro, login, criação/listagem/detalhes/edição/arquivamento de hábitos, registro e remoção de realizações, histórico por período e total de dias. Hábitos arquivados permanecem consultáveis com seu histórico. A sessão fica apenas na memória do navegador e termina ao sair ou recarregar a página. Ao sair, rascunhos e filtros são descartados.
 
-Planejadas: recuperação de senha, restauração de hábitos, testes de integração adicionais, documentação OpenAPI, indicadores avançados e endurecimento de segurança. O CI valida backend e frontend no GitHub Actions; não há implantação automática.
+Fora do escopo inicial ou possíveis evoluções: recuperação de senha, restauração de hábitos, documentação OpenAPI, indicadores avançados e endurecimento de segurança. O CI valida backend, frontend e fluxo no navegador; não há implantação automática.
 
 ## Tecnologias e pré-requisitos
 - Windows 10/11, PowerShell, Git, Java **21** (JDK), Maven **3.9+**, Node.js **22.13 ou superior na linha 22**, ou **24 ou superior** (recomendado: versão LTS) e npm.
@@ -74,33 +74,49 @@ Acesse **http://localhost:5173**. O Vite encaminha `/api` para `http://localhost
 
 ## 4. Testes
 
+Execute os comandos em terminais separados, a partir da raiz do projeto. Os testes que acessam o PostgreSQL podem criar ou alterar tabelas e dados: **use um banco exclusivo e descartável, nunca produção**.
+
 ```powershell
-# Em backend; formatação Java e testes unitários (sem banco)
+# Backend: em um terminal, a partir da raiz
+cd backend
 npm ci
 npm run format:check
-mvn test
-# Em backend, com PostgreSQL e as variáveis DB_* e JWT_SECRET configuradas para teste
-# Usa um banco exclusivo de teste; nunca use produção.
-mvn verify
-# Em frontend
+mvn test   # testes unitários
+# Configure DB_URL, DB_USER, DB_PASSWORD e JWT_SECRET para um banco de teste descartável.
+mvn verify # unitários, integração com PostgreSQL, Checkstyle e empacotamento
+```
+
+```powershell
+# Frontend: em outro terminal, a partir da raiz
+cd frontend
+npm ci
 npm run lint
 npm run format:check
 npm run build
-# Opcional: com Python 3 instalado e backend rodando; cria duas contas de teste no banco de desenvolvimento
-cd ..
-python scripts/smoke_test.py
 ```
 
-O smoke test usa HTTP real, grava dados no banco e cobre cadastro/login, acesso não autorizado, isolamento, hábitos, datas futuras, idempotência, histórico e arquivamento. Não o execute em banco de produção. Para validar a interface e a persistência no Windows, siga o [roteiro manual de validação](docs/validacao-windows.md). A consulta de histórico é limitada ao período selecionado.
+Para o smoke HTTP, inicie o backend apontando para um banco descartável e, em outro terminal na raiz, execute `python scripts/smoke_test.py`. Ele cria contas e dados de teste; cobre autenticação, isolamento, hábitos, datas futuras, idempotência, histórico e arquivamento.
+
+Para os testes de navegador, inicie o backend apontando para um banco descartável. Em outro terminal, na pasta `frontend`, execute:
+
+```powershell
+npm ci
+npx playwright install chromium
+npm run test:e2e
+```
+
+O Playwright inicia seu próprio Vite em `localhost:5173`, que precisa estar livre, e usa o proxy para `localhost:8080` por padrão. Os testes criam contas e hábitos sem removê-los. A configuração do backend deve permitir a origem `http://localhost:5173`. Veja mais detalhes e cuidados com rastros em [qualidade](docs/qualidade.md#executar-o-teste-de-navegador).
+
+A suíte de navegador cobre o fluxo principal com Chromium, verificações de teclado e regras automatizadas de acessibilidade, além de cenários de erro simulados. Ela não substitui testes manuais, nem comprova conformidade de acessibilidade. O [roteiro de validação Windows](docs/validacao-windows.md) permanece pendente de execução registrada.
 
 ## Integração contínua (CI)
 
-O workflow `.github/workflows/ci.yml` executa em pushes e pull requests para `main` e `develop`, e também pode ser iniciado manualmente na aba Actions. Ele verifica o estilo Java, roda os testes unitários e de integração e empacota o backend com Java 21, executa o smoke test HTTP contra um PostgreSQL 16 isolado e verifica lint, formatação e compilação do frontend com Node.js 22. Os relatórios dos testes unitários e de integração ficam disponíveis como artefato por 7 dias. Não são necessários secrets: as credenciais usadas no CI são temporárias e exclusivas do ambiente de teste.
+O workflow `.github/workflows/ci.yml` roda em pushes e pull requests para `main` e `develop`, ou manualmente. O job de backend verifica estilo Java, executa testes unitários e de integração com PostgreSQL 16, empacota a aplicação e roda o smoke HTTP e Playwright/Chromium com o backend e banco isolados. O job de frontend verifica lint, formatação, TypeScript e build. Consulte a aba Actions para o resultado de cada execução.
 
-O CI também inventaria e consulta advisories das dependências Maven nas execuções do workflow; veja [gestão de dependências](docs/dependencias.md) para resultados e limitações. O CI não faz deploy nem substitui testes de interface no navegador. Para impedir merges com falhas, configure uma regra de proteção para exigir os checks **Backend (Java 21, PostgreSQL 16)** e **Frontend (Node.js 22)** no GitHub; a disponibilidade depende do plano e das configurações do repositório.
+O CI usa credenciais descartáveis, não faz deploy e não possui execução semanal agendada. Relatórios Java são mantidos por 7 dias; a auditoria Maven gera artefatos por 30 dias. Rastros Playwright não são enviados como artefatos. O CI também consulta advisories das dependências Maven; os avisos não bloqueiam o fluxo nem comprovam explorabilidade. Veja [gestão de dependências](docs/dependencias.md) para detalhes e limitações.
 
 ## Segurança e limites
-BCrypt, JWT de 8 horas, verificação por dono no backend, validação e CORS configurável. `localStorage` não é usado; o token fica em memória. Senhas, tokens e `.env` não devem ser enviados ao Git. Em produção seriam necessários HTTPS, limitação de tentativas, revogação/rotação de tokens, políticas de senha, auditoria, tratamento mais completo e avaliação de dependências. Não existe SLA ou benchmark de desempenho; veja `docs/qualidade.md`.
+BCrypt, JWT de 8 horas, verificação por dono no backend, validação e CORS configurável. `localStorage` não é usado; o token fica em memória. Senhas, tokens e `.env` não devem ser enviados ao Git. Antes de produção, são necessários HTTPS, limitação de tentativas, revogação/rotação de tokens, políticas de senha, auditoria, tratamento mais completo e revisão dos advisories pendentes do Spring descritos em [gestão de dependências](docs/dependencias.md). Não existe SLA ou benchmark de desempenho; veja `docs/qualidade.md`.
 
 ## Documentação e API
 - [Índice da documentação](docs/README.md), [guia de contribuição](CONTRIBUTING.md) e [changelog](CHANGELOG.md).
