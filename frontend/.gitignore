@@ -16,3 +16,7 @@ target/
 *.iml
 .DS_Store
 Thumbs.db
+
+# Playwright artifacts may contain test session data
+playwright-report/
+test-results/

@@ -19,7 +19,7 @@ jobs:
   backend:
     name: Backend (Java 21, PostgreSQL 16)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -66,7 +66,12 @@ jobs:
         run: npm run format:check
       - name: Run unit and integration tests and package
         run: mvn --batch-mode --no-transfer-progress -DfailIfNoTests=true clean verify
-      - name: Run HTTP smoke test against PostgreSQL
+      - name: Install frontend E2E dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run HTTP smoke and browser tests against PostgreSQL
         shell: bash
         run: |
           set -euo pipefail
@@ -98,6 +103,7 @@ jobs:
             exit 1
           fi
           python3 ../scripts/smoke_test.py
+          (cd ../frontend && npm run test:e2e)
       - name: Export resolved Maven dependency tree
         run: mvn --batch-mode --no-transfer-progress org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree -DoutputType=json -DoutputFile=target/dependency-tree.json
       - name: Check Maven dependencies against GitHub advisories
