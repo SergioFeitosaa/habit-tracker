@@ -1,10 +1,19 @@
+import AxeBuilder from "@axe-core/playwright";
 import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
+
+async function checkAccessibility(page: Page) {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
+}
 
 const password = "Senha-teste-123!";
 
 async function register(page: Page, email: string) {
   await page.getByRole("button", { name: "Cadastre-se" }).click();
+  await checkAccessibility(page);
   await page.getByLabel("Nome", { exact: true }).fill("Pessoa Teste");
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
@@ -27,8 +36,10 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
   const first = `e2e-${randomUUID()}@example.com`;
   const second = `e2e-${randomUUID()}@example.com`;
   await page.goto("/");
+  await checkAccessibility(page);
   await register(page, first);
   await login(page, first);
+  await checkAccessibility(page);
 
   await page.getByLabel("Nome do hábito").fill("Leitura E2E");
   await page.getByLabel("Descrição").fill("Ler diariamente");
@@ -47,6 +58,7 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
   await page.getByRole("button", { name: "Marcar ✓", exact: true }).click();
   await expect(page.getByText("1 dia concluído no período")).toBeVisible();
   await expect(page.getByText("01/01/2020")).toBeVisible();
+  await checkAccessibility(page);
 
   page.once("dialog", (dialog) => dialog.accept());
   await page
@@ -79,6 +91,7 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
   await page.getByLabel("Até", { exact: true }).fill("2020-12-31");
   await page.getByRole("button", { name: "Consultar período" }).click();
   await expect(page.getByText("1 dia concluído no período")).toBeVisible();
+  await checkAccessibility(page);
   await page.getByRole("button", { name: "Sair" }).click();
 
   await expect(page.getByLabel("E-mail")).toHaveValue("");
