@@ -106,6 +106,21 @@ function App({ onLogout }: { onLogout: () => void }) {
       ),
     );
   }
+  async function refreshAfter(
+    confirmed: string,
+    retry: string,
+    refresh: () => Promise<void>,
+  ) {
+    try {
+      await refresh();
+      return true;
+    } catch (error) {
+      const detail =
+        error instanceof Error ? error.message : "Ocorreu um erro.";
+      setMessage(`${confirmed} ${retry} ${detail}`);
+      return false;
+    }
+  }
   useEffect(() => {
     if (token) void run(() => loadHabits(token));
   }, [token, showArchived]);
@@ -133,7 +148,7 @@ function App({ onLogout }: { onLogout: () => void }) {
   function save(e: React.FormEvent) {
     e.preventDefault();
     void run(async () => {
-      await api(
+      const saved = await api<Habit>(
         editing ? `/habits/${editing}` : "/habits",
         token,
         editing ? "PUT" : "POST",
@@ -142,7 +157,18 @@ function App({ onLogout }: { onLogout: () => void }) {
       setTitle("");
       setDescription("");
       setEditing(null);
-      await loadHabits();
+      if (!showArchived) {
+        setHabits((current) => [
+          ...current.filter((habit) => habit.id !== saved.id),
+          saved,
+        ]);
+      }
+      setSelected((current) => (current?.id === saved.id ? saved : current));
+      await refreshAfter(
+        "Hábito salvo, mas a lista não foi atualizada.",
+        "Use Atualizar lista para tentar novamente.",
+        loadHabits,
+      );
     });
   }
   function select(h: Habit) {
@@ -158,8 +184,16 @@ function App({ onLogout }: { onLogout: () => void }) {
         token,
         on ? "PUT" : "DELETE",
       );
-      await loadHistory(selected);
-      setMessage(on ? "Realização registrada." : "Realização removida.");
+      setHistory(null);
+      const refreshed = await refreshAfter(
+        on
+          ? "Realização registrada, mas o histórico não foi atualizado."
+          : "Realização removida, mas o histórico não foi atualizado.",
+        "Use Consultar período para tentar novamente.",
+        () => loadHistory(selected),
+      );
+      if (refreshed)
+        setMessage(on ? "Realização registrada." : "Realização removida.");
     });
   }
   return (
@@ -350,6 +384,13 @@ function App({ onLogout }: { onLogout: () => void }) {
                       >
                         {showArchived ? "Ver ativos" : "Ver arquivados"}
                       </button>
+                      <button
+                        className="link"
+                        disabled={busy}
+                        onClick={() => void run(() => loadHabits())}
+                      >
+                        Atualizar lista
+                      </button>
                     </div>
                     <span className="count">{habits.length}</span>
                   </div>
@@ -412,7 +453,16 @@ function App({ onLogout }: { onLogout: () => void }) {
                                         setSelected(null);
                                         setHistory(null);
                                       }
-                                      await loadHabits();
+                                      setHabits((current) =>
+                                        current.filter(
+                                          (habit) => habit.id !== h.id,
+                                        ),
+                                      );
+                                      await refreshAfter(
+                                        "Hábito arquivado, mas a lista não foi atualizada.",
+                                        "Use Atualizar lista para tentar novamente.",
+                                        loadHabits,
+                                      );
                                     });
                                 }}
                               >
