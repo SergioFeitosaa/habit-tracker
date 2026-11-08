@@ -41,7 +41,7 @@ class HabitServiceTest {
         LocalDate.now(ZoneId.of("America/Recife")).plusDays(1)
       )
     );
-    verify(completions, never()).save(any());
+    verify(completions, never()).insertIfAbsent(anyLong(), any());
   }
 
   @Test
@@ -56,13 +56,12 @@ class HabitServiceTest {
   }
 
   @Test
-  void markingExistingDayIsIdempotent() {
+  void markingDelegatesToAtomicInsert() {
     LocalDate date = LocalDate.of(2020, 1, 1);
-    when(completions.findByHabitIdAndDate(3L, date)).thenReturn(
-      Optional.of(mock(Completion.class))
-    );
     service.mark("u@example.com", 3L, date);
-    verify(completions, never()).save(any());
+    service.mark("u@example.com", 3L, date);
+    verify(completions, times(2)).insertIfAbsent(3L, date);
+    verify(completions, never()).findByHabitIdAndDate(anyLong(), any());
   }
 
   @Test
@@ -88,5 +87,6 @@ class HabitServiceTest {
         .getStatus()
         .value()
     );
+    verify(completions, never()).insertIfAbsent(anyLong(), any());
   }
 }

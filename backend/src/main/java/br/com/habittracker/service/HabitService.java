@@ -103,9 +103,7 @@ public class HabitService {
       HttpStatus.BAD_REQUEST,
       "Não é possível registrar datas futuras."
     );
-    if (completions.findByHabitIdAndDate(id, date).isEmpty()) completions.save(
-      new Completion(h, date)
-    );
+    completions.insertIfAbsent(id, date);
   }
 
   public void unmark(String email, Long id, LocalDate date) {
