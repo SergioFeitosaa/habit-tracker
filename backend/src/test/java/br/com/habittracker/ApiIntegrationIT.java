@@ -5,12 +5,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -26,6 +32,9 @@ class ApiIntegrationIT {
 
   private static final String PASSWORD = "Senha-teste-123!";
   private static final String DAY = "2020-01-01";
+
+  @Value("${app.jwt-secret}")
+  private String jwtSecret;
 
   @Autowired
   private MockMvc mvc;
@@ -144,6 +153,41 @@ class ApiIntegrationIT {
         get("/api/habits").header("Authorization", "Bearer token-invalido")
       )
       .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void expiredTokenCannotReadOrMutateAndNewLoginWorks() throws Exception {
+    String email = register();
+    String valid = login(email, PASSWORD);
+    long habitId = createHabit(valid);
+    Instant now = Instant.now();
+    String expired = Jwts.builder()
+      .subject(email)
+      .issuedAt(Date.from(now.minusSeconds(120)))
+      .expiration(Date.from(now.minusSeconds(60)))
+      .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+      .compact();
+    mvc
+      .perform(get("/api/habits").header("Authorization", "Bearer " + expired))
+      .andExpect(status().isUnauthorized());
+    mvc
+      .perform(
+        put("/api/habits/{id}/completions/{date}", habitId, DAY).header(
+          "Authorization",
+          "Bearer " + expired
+        )
+      )
+      .andExpect(status().isUnauthorized());
+    String renewed = login(email, PASSWORD);
+    mvc
+      .perform(
+        get("/api/habits/{id}/completions", habitId)
+          .param("from", DAY)
+          .param("to", DAY)
+          .header("Authorization", "Bearer " + renewed)
+      )
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.total").value(0));
   }
 
   @Test
