@@ -348,12 +348,10 @@ function App({ onLogout }: { onLogout: () => void }) {
                           <button
                             className="habit-select"
                             onClick={() => select(h)}
-                            aria-label={`Consultar ${h.name} ${h.description || "Hábito diário"}`}
                           >
-                            <span className="habit-symbol" aria-hidden="true">
-                              ✳
-                            </span>
+                            <span className="habit-symbol" aria-hidden="true" />
                             <span>
+                              <span className="sr-only">Consultar </span>
                               <strong>{h.name}</strong>
                               <small>{h.description || "Hábito diário"}</small>
                             </span>
