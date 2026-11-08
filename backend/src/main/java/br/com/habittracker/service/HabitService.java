@@ -48,6 +48,14 @@ public class HabitService {
       );
   }
 
+  private Habit ownForUpdate(String email, Long id) {
+    return habits
+      .findWithLockByIdAndUserId(id, user(email).getId())
+      .orElseThrow(() ->
+        new ApiException(HttpStatus.NOT_FOUND, "Hábito não encontrado.")
+      );
+  }
+
   private HabitView view(Habit h) {
     return new HabitView(
       h.getId(),
@@ -85,19 +93,19 @@ public class HabitService {
   }
 
   public HabitView update(String email, Long id, HabitInput input) {
-    Habit h = own(email, id);
+    Habit h = ownForUpdate(email, id);
     active(h);
     h.update(input.name().trim(), input.description());
     return view(h);
   }
 
   public void archive(String email, Long id) {
-    Habit h = own(email, id);
+    Habit h = ownForUpdate(email, id);
     h.archive();
   }
 
   public void mark(String email, Long id, LocalDate date) {
-    Habit h = own(email, id);
+    Habit h = ownForUpdate(email, id);
     active(h);
     if (date.isAfter(LocalDate.now(zone))) throw new ApiException(
       HttpStatus.BAD_REQUEST,
@@ -107,7 +115,7 @@ public class HabitService {
   }
 
   public void unmark(String email, Long id, LocalDate date) {
-    Habit h = own(email, id);
+    Habit h = ownForUpdate(email, id);
     active(h);
     completions.findByHabitIdAndDate(id, date).ifPresent(completions::delete);
   }
