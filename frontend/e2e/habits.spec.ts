@@ -44,7 +44,7 @@ test("usuário acompanha hábito e histórico isolado após nova sessão", async
   await page.getByLabel("Data da realização").fill("2020-01-01");
   await page.getByLabel("De", { exact: true }).fill("2020-01-01");
   await page.getByLabel("Até", { exact: true }).fill("2020-12-31");
-  await page.getByRole("button", { name: "Marcar" }).click();
+  await page.getByRole("button", { name: "Marcar ✓", exact: true }).click();
   await expect(page.getByText("1 dia concluído no período")).toBeVisible();
   await expect(page.getByText("01/01/2020")).toBeVisible();
 
