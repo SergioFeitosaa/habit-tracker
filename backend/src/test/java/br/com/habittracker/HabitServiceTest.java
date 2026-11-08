@@ -30,6 +30,9 @@ class HabitServiceTest {
     when(users.findByEmail("u@example.com")).thenReturn(Optional.of(user));
     when(user.getId()).thenReturn(1L);
     when(habits.findByIdAndUserId(3L, 1L)).thenReturn(Optional.of(habit));
+    when(habits.findWithLockByIdAndUserId(3L, 1L)).thenReturn(
+      Optional.of(habit)
+    );
   }
 
   @Test
@@ -62,6 +65,20 @@ class HabitServiceTest {
     service.mark("u@example.com", 3L, date);
     verify(completions, times(2)).insertIfAbsent(3L, date);
     verify(completions, never()).findByHabitIdAndDate(anyLong(), any());
+  }
+
+  @Test
+  void refusesAnotherUsersHabitOnWrite() {
+    when(habits.findWithLockByIdAndUserId(4L, 1L)).thenReturn(Optional.empty());
+    assertEquals(
+      404,
+      assertThrows(ApiException.class, () ->
+        service.mark("u@example.com", 4L, LocalDate.of(2020, 1, 1))
+      )
+        .getStatus()
+        .value()
+    );
+    verify(completions, never()).insertIfAbsent(anyLong(), any());
   }
 
   @Test

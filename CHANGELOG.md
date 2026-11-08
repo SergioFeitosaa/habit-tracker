@@ -11,6 +11,7 @@ Mudanças relevantes serão registradas aqui seguindo a estrutura de [Keep a Cha
 - Guia de contribuição, índice de documentação e templates de issues e pull requests.
 
 ### Corrigido
+- Alterações de um hábito são serializadas para evitar registros ou remoções após arquivamento concorrente.
 - Marcações simultâneas da mesma realização usam inserção atômica no PostgreSQL.
 
 ### Alterado

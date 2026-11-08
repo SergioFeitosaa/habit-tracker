@@ -101,19 +101,22 @@ class ConcurrentCompletionIT {
         }
       });
 
-      // Wait until the competing INSERT actually blocks on PostgreSQL's unique index.
+      // Wait until the competing operation blocks on a PostgreSQL lock.
       boolean blocked = false;
       long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
       while (System.nanoTime() < deadline && !blocked) {
         blocked = Boolean.TRUE.equals(
           jdbc.queryForObject(
-            "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() AND state = 'active' AND wait_event_type = 'Lock' AND query ILIKE '%insert%completions%')",
+            "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() AND state = 'active' AND wait_event_type = 'Lock' AND (query ILIKE '%insert%completions%' OR query ILIKE '%for%update%'))",
             Boolean.class
           )
         );
         if (!blocked) Thread.sleep(25);
       }
-      assertTrue(blocked, "Competing insert did not reach the database lock");
+      assertTrue(
+        blocked,
+        "Competing operation did not reach the database lock"
+      );
       release.countDown();
       first.get(10, TimeUnit.SECONDS);
       second.get(10, TimeUnit.SECONDS);
